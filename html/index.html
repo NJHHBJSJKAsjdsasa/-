@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P2P修仙游戏</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- 游戏容器 -->
+    <div id="game-container" class="game-container login">
+        <!-- 登录界面 -->
+        <div id="login-screen" class="login-panel">
+            <h1>P2P修仙游戏</h1>
+            <div class="login-tabs">
+                <button id="tab-new-character" class="tab-btn active">创建新角色</button>
+                <button id="tab-restore-character" class="tab-btn">恢复角色</button>
+            </div>
+            
+            <!-- 创建新角色面板 -->
+            <div id="new-character-panel" class="login-panel-content">
+                <div class="login-form">
+                    <input type="text" id="player-name-input" placeholder="请输入道号" maxlength="20">
+                    <button id="create-player-btn" disabled>踏入仙途</button>
+                </div>
+            </div>
+            
+            <!-- 恢复角色面板 -->
+            <div id="restore-character-panel" class="login-panel-content hidden">
+                <div class="login-form">
+                    <input type="text" id="cid-input" placeholder="请输入命数印记 (CID)" maxlength="100">
+                    <button id="restore-player-btn" disabled>重入仙途</button>
+                </div>
+                <p class="hint">命数印记是备份角色时获得的CID</p>
+            </div>
+            
+            <p class="hint">使用WebRTC P2P网络 + IPFS存储</p>
+        </div>
+
+        <!-- 主游戏界面 -->
+        <div id="main-game" class="main-game hidden">
+            <!-- 头部信息栏 -->
+            <header class="game-header">
+                <div class="player-info">
+                    <span id="header-player-name" class="player-name">-</span>
+                    <span id="header-realm" class="realm">-</span>
+                    <span id="header-level" class="level">-</span>
+                </div>
+                
+                <div class="header-actions">
+                    <button id="open-player-panel-btn">角色</button>
+                    <button id="connect-btn">连接网络</button>
+                </div>
+
+                <!-- 网络状态 -->
+                <div id="network-status" class="network-status">
+                    <span class="status-indicator offline"></span>
+                    <span class="status-text">未连接</span>
+                    <span class="latency">-</span>
+                </div>
+
+                <!-- 信令节点信息 -->
+                <div id="signal-node-info" class="signal-node-info hidden">
+                    <span class="node-label">节点:</span>
+                    <span id="signal-node-url" class="node-url">-</span>
+                    <span id="signal-node-status" class="node-status offline">断开</span>
+                </div>
+
+                <!-- DHT状态 -->
+                <div id="dht-status" class="dht-status">
+                    <span class="dht-indicator offline"></span>
+                    <span class="dht-status-text">DHT未连接</span>
+                    <span id="dht-node-count" class="dht-node-count">0 节点</span>
+                    <span id="dht-public-key" class="dht-public-key" title=""></span>
+                </div>
+            </header>
+
+            <!-- 主内容区 -->
+            <main class="game-main">
+                <!-- 左侧：修炼区域 -->
+                <section class="cultivation-section">
+                    <h2>修炼</h2>
+                    
+                    <div id="cultivating-panel" class="cultivating hidden">
+                        <p>正在修炼: <span id="current-method-name">-</span></p>
+                        <div class="exp-bar">
+                            <div id="exp-fill" class="exp-fill" style="width: 0%"></div>
+                        </div>
+                        <p class="exp-text">
+                            <span id="current-exp">0</span> / <span id="max-exp">100</span> (<span id="exp-percentage">0</span>%)
+                        </p>
+                        <p class="cultivation-rate">+<span id="exp-per-second">0</span>/秒</p>
+                        <button id="stop-cultivation-btn">停止修炼</button>
+                    </div>
+
+                    <div id="method-list-panel" class="method-list">
+                        <p>选择功法:</p>
+                        <div id="method-buttons">
+                            <!-- 功法按钮由JS动态生成 -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 中间：系统消息 -->
+                <section class="messages-section">
+                    <h2>系统消息</h2>
+                    <div id="messages-list" class="messages-list">
+                        <p class="empty">暂无消息</p>
+                    </div>
+                </section>
+
+                <!-- 右侧：在线玩家 -->
+                <section class="players-section">
+                    <h2>在线玩家 (<span id="online-count">0</span>)</h2>
+                    <div id="player-list" class="player-list">
+                        <p class="empty">未连接到服务器</p>
+                    </div>
+                </section>
+            </main>
+        </div>
+
+        <!-- 角色面板弹窗 -->
+        <div id="player-panel-overlay" class="player-panel-overlay hidden">
+            <div class="player-panel">
+                <div class="panel-header">
+                    <h2 id="panel-player-name">-</h2>
+                    <button id="close-player-panel-btn" class="close-btn">×</button>
+                </div>
+                
+                <div class="panel-actions">
+                    <button id="backup-character-btn" class="backup-btn">备份命数</button>
+                </div>
+
+                <div class="panel-content">
+                    <div class="basic-info">
+                        <div id="panel-realm-badge" class="realm-badge">-</div>
+                        <div class="level-info">等级 <span id="panel-level">1</span></div>
+                    </div>
+
+                    <div class="exp-bar-container">
+                        <div class="exp-label">修为进度</div>
+                        <div class="exp-bar">
+                            <div id="panel-exp-fill" class="exp-fill" style="width: 0%"></div>
+                        </div>
+                        <div class="exp-text"><span id="panel-exp">0</span> / <span id="panel-max-exp">100</span></div>
+                    </div>
+
+                    <div class="health-mana">
+                        <div class="resource-bar">
+                            <span class="resource-label">生命</span>
+                            <div class="attribute-bar">
+                                <div id="hp-fill" class="attribute-fill" style="width: 100%; background-color: #f44336;"></div>
+                            </div>
+                            <span class="resource-value"><span id="hp">100</span>/<span id="max-hp">100</span></span>
+                        </div>
+                        <div class="resource-bar">
+                            <span class="resource-label">灵力</span>
+                            <div class="attribute-bar">
+                                <div id="mp-fill" class="attribute-fill" style="width: 100%; background-color: #2196f3;"></div>
+                            </div>
+                            <span class="resource-value"><span id="mp">50</span>/<span id="max-mp">50</span></span>
+                        </div>
+                    </div>
+
+                    <div class="attributes-section">
+                        <h3>属性</h3>
+                        <div class="attributes-grid">
+                            <div class="attribute-item">
+                                <span class="attr-name">力量</span>
+                                <span id="attr-strength" class="attr-value">10</span>
+                            </div>
+                            <div class="attribute-item">
+                                <span class="attr-name">敏捷</span>
+                                <span id="attr-agility" class="attr-value">10</span>
+                            </div>
+                            <div class="attribute-item">
+                                <span class="attr-name">智力</span>
+                                <span id="attr-intelligence" class="attr-value">10</span>
+                            </div>
+                            <div class="attribute-item">
+                                <span class="attr-name">体质</span>
+                                <span id="attr-vitality" class="attr-value">10</span>
+                            </div>
+                            <div class="attribute-item">
+                                <span class="attr-name">灵力</span>
+                                <span id="attr-spirit" class="attr-value">10</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="equipment-section">
+                        <h3>装备</h3>
+                        <div class="equipment-slots">
+                            <div class="equipment-slot empty" data-slot="weapon">
+                                <div class="slot-name">武器</div>
+                                <div class="empty-text">空</div>
+                            </div>
+                            <div class="equipment-slot empty" data-slot="armor">
+                                <div class="slot-name">护甲</div>
+                                <div class="empty-text">空</div>
+                            </div>
+                            <div class="equipment-slot empty" data-slot="helmet">
+                                <div class="slot-name">头盔</div>
+                                <div class="empty-text">空</div>
+                            </div>
+                            <div class="equipment-slot empty" data-slot="boots">
+                                <div class="slot-name">靴子</div>
+                                <div class="empty-text">空</div>
+                            </div>
+                            <div class="equipment-slot empty" data-slot="accessory1">
+                                <div class="slot-name">饰品1</div>
+                                <div class="empty-text">空</div>
+                            </div>
+                            <div class="equipment-slot empty" data-slot="accessory2">
+                                <div class="slot-name">饰品2</div>
+                                <div class="empty-text">空</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="current-method-section" class="cultivation-section-panel hidden">
+                        <h3>当前功法</h3>
+                        <div class="method-card">
+                            <div id="panel-method-name" class="method-name">-</div>
+                            <div id="panel-method-quality" class="method-quality">-</div>
+                            <div id="panel-method-desc" class="method-desc">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 战斗面板弹窗 -->
+        <div id="combat-overlay" class="modal-overlay hidden">
+            <div class="combat-panel">
+                <div class="combat-header">
+                    <span class="round-info">第 <span id="combat-round">1</span> 回合</span>
+                    <span id="combat-status" class="combat-status active">战斗中</span>
+                </div>
+
+                <div class="combat-arena">
+                    <!-- 敌方信息 -->
+                    <div class="combatant enemy">
+                        <div id="enemy-name" class="combatant-name">-</div>
+                        <div class="hp-bar-container">
+                            <div class="hp-bar">
+                                <div id="enemy-hp-fill" class="hp-fill" style="width: 100%"></div>
+                            </div>
+                            <span class="hp-text"><span id="enemy-hp">100</span>/<span id="enemy-max-hp">100</span></span>
+                        </div>
+                    </div>
+
+                    <div class="vs-divider">VS</div>
+
+                    <!-- 我方信息 -->
+                    <div class="combatant self">
+                        <div id="self-name" class="combatant-name">-</div>
+                        <div class="hp-bar-container">
+                            <div class="hp-bar">
+                                <div id="self-hp-fill" class="hp-fill self" style="width: 100%"></div>
+                            </div>
+                            <span class="hp-text"><span id="self-hp">100</span>/<span id="self-max-hp">100</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 战斗日志 -->
+                <div class="combat-logs">
+                    <h4>战斗记录</h4>
+                    <div id="combat-logs-container" class="logs-container">
+                        <!-- 日志由JS动态生成 -->
+                    </div>
+                </div>
+
+                <!-- 技能按钮 -->
+                <div id="combat-actions" class="combat-actions">
+                    <div id="skills-grid" class="skills-grid">
+                        <!-- 技能按钮由JS动态生成 -->
+                    </div>
+                    <div class="action-buttons">
+                        <button id="escape-btn" class="escape-btn">逃跑</button>
+                        <button id="surrender-btn" class="surrender-btn">投降</button>
+                    </div>
+                </div>
+
+                <div id="combat-result" class="combat-result hidden">
+                    <div id="result-text" class="result-text">-</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 交易面板弹窗 -->
+        <div id="trade-overlay" class="modal-overlay hidden">
+            <div class="trade-panel">
+                <h3>交易</h3>
+                <p>交易状态: <span id="trade-status">-</span></p>
+                <div class="trade-actions">
+                    <button id="cancel-trade-btn">取消</button>
+                    <button id="confirm-trade-btn">确认</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- CID显示弹窗 -->
+        <div id="cid-modal" class="modal-overlay hidden">
+            <div class="cid-panel">
+                <div class="cid-header">
+                    <h3>命数印记</h3>
+                    <button id="close-cid-modal-btn" class="close-btn">×</button>
+                </div>
+                <div class="cid-content">
+                    <p class="cid-message">命数已刻入天道，请妥善保管你的命数印记</p>
+                    <div class="cid-display">
+                        <input type="text" id="cid-display-input" readonly>
+                        <button id="copy-cid-btn" class="copy-btn">复制</button>
+                    </div>
+                    <p class="cid-hint">此印记可用于在任何设备上恢复你的角色</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 加载遮罩层 -->
+        <div id="loading-overlay" class="loading-overlay hidden">
+            <div class="loading-content">
+                <div class="loading-spinner"></div>
+                <p id="loading-text">正在处理...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="js/ipfs-storage.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/cultivation.js"></script>
+    <script src="js/combat.js"></script>
+    <script src="js/trade.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/network.js"></script>
+    <script src="js/webrtc.js"></script>
+    <script src="js/dht-manager.js"></script>
+    <script src="js/game-elements.js"></script>
+    <script src="js/game.js"></script>
+    <script>
+        // 调试脚本：确保按钮可以正常工作
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('[Debug] DOMContentLoaded triggered');
+            var input = document.getElementById('player-name-input');
+            var btn = document.getElementById('create-player-btn');
+            console.log('[Debug] Input element:', input);
+            console.log('[Debug] Button element:', btn);
+            console.log('[Debug] Button disabled:', btn ? btn.disabled : 'N/A');
+            
+            if (input && btn) {
+                input.addEventListener('input', function(e) {
+                    console.log('[Debug] Input event, value:', e.target.value);
+                    btn.disabled = !e.target.value.trim();
+                    console.log('[Debug] Button disabled set to:', btn.disabled);
+                });
+                
+                btn.addEventListener('click', function(e) {
+                    console.log('[Debug] Button clicked!');
+                    var name = input.value.trim();
+                    if (name) {
+                        console.log('[Debug] Starting game with name:', name);
+                        if (typeof initializePlayer === 'function') {
+                            initializePlayer(name);
+                        } else {
+                            console.error('[Debug] initializePlayer function not found!');
+                            alert('游戏初始化失败，请刷新页面重试');
+                        }
+                    }
+                });
+                console.log('[Debug] Event listeners attached successfully');
+            } else {
+                console.error('[Debug] Input or button not found!');
+            }
+        });
+    </script>
+</body>
+</html>

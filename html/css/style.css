@@ -1,0 +1,1516 @@
+/* ========================================
+   基础样式重置
+   ======================================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  color: white;
+  overflow: hidden;
+}
+
+/* 工具类 */
+.hidden {
+  display: none !important;
+}
+
+/* ========================================
+   游戏容器
+   ======================================== */
+.game-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+}
+
+/* ========================================
+   登录界面
+   ======================================== */
+.game-container.login {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.login-panel {
+  background: rgba(0, 0, 0, 0.5);
+  padding: 40px;
+  border-radius: 16px;
+  border: 2px solid #e94560;
+  text-align: center;
+  min-width: 300px;
+  max-width: 90%;
+}
+
+.login-panel h1 {
+  color: #e94560;
+  margin-bottom: 24px;
+  font-size: 28px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.login-form input {
+  padding: 12px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 16px;
+  transition: all 0.2s;
+}
+
+.login-form input::placeholder {
+  color: #888;
+}
+
+.login-form input:focus {
+  outline: none;
+  border-color: #e94560;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.login-form button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #e94560, #ff6b6b);
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.login-form button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(233, 69, 96, 0.4);
+}
+
+.login-form button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.hint {
+  margin-top: 16px;
+  color: #888;
+  font-size: 12px;
+}
+
+/* 登录选项卡 */
+.login-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  justify-content: center;
+}
+
+.tab-btn {
+  padding: 8px 16px;
+  border: 1px solid rgba(233, 69, 96, 0.3);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #888;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+}
+
+.tab-btn:hover {
+  background: rgba(233, 69, 96, 0.1);
+}
+
+.tab-btn.active {
+  background: rgba(233, 69, 96, 0.3);
+  color: #fff;
+  border-color: #e94560;
+}
+
+.login-panel-content {
+  animation: fadeIn 0.3s ease;
+}
+
+/* ========================================
+   主游戏界面
+   ======================================== */
+.main-game {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* ========================================
+   游戏头部
+   ======================================== */
+.game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  background: rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(233, 69, 96, 0.3);
+  flex-shrink: 0;
+}
+
+.player-info {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.player-name {
+  font-size: 18px;
+  font-weight: bold;
+  color: #fff;
+}
+
+.realm {
+  padding: 4px 12px;
+  background: linear-gradient(135deg, #e94560, #ff6b6b);
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.level {
+  color: #ffd700;
+  font-weight: bold;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.header-actions button {
+  padding: 8px 16px;
+  border: 1px solid rgba(233, 69, 96, 0.5);
+  border-radius: 6px;
+  background: rgba(233, 69, 96, 0.2);
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+}
+
+.header-actions button:hover {
+  background: rgba(233, 69, 96, 0.4);
+}
+
+.header-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 网络状态 */
+.network-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.status-indicator.online {
+  background: #4caf50;
+  box-shadow: 0 0 8px #4caf50;
+}
+
+.status-indicator.offline {
+  background: #f44336;
+}
+
+.status-indicator.connecting {
+  background: #ff9800;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.status-text {
+  color: #888;
+}
+
+.latency {
+  color: #4caf50;
+  min-width: 40px;
+  text-align: right;
+}
+
+/* DHT状态 */
+.dht-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  margin-left: 16px;
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.dht-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.dht-indicator.ready {
+  background: #2196f3;
+  box-shadow: 0 0 6px #2196f3;
+}
+
+.dht-indicator.connecting {
+  background: #ff9800;
+  animation: pulse 1s infinite;
+}
+
+.dht-indicator.error {
+  background: #f44336;
+}
+
+.dht-indicator.offline {
+  background: #666;
+}
+
+.dht-status-text {
+  color: #888;
+}
+
+.dht-public-key {
+  color: #2196f3;
+  font-family: monospace;
+  font-size: 10px;
+  cursor: help;
+}
+
+/* ========================================
+   主内容区 - 三栏布局
+   ======================================== */
+.game-main {
+  display: grid;
+  grid-template-columns: 300px 1fr 300px;
+  gap: 16px;
+  padding: 16px;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ========================================
+   修炼区域
+   ======================================== */
+.cultivation-section {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid rgba(233, 69, 96, 0.2);
+  overflow-y: auto;
+}
+
+.cultivation-section h2 {
+  color: #e94560;
+  margin-bottom: 16px;
+  font-size: 18px;
+  border-bottom: 1px solid rgba(233, 69, 96, 0.3);
+  padding-bottom: 8px;
+}
+
+.cultivating {
+  text-align: center;
+}
+
+.cultivating p {
+  margin-bottom: 12px;
+}
+
+.exp-bar {
+  height: 20px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.exp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4caf50, #8bc34a);
+  transition: width 0.3s ease;
+}
+
+.exp-text {
+  font-size: 14px;
+  color: #aaa;
+}
+
+.cultivation-rate {
+  color: #4caf50;
+  font-weight: bold;
+}
+
+.cultivating button {
+  margin-top: 16px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  background: #f44336;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+
+.cultivating button:hover {
+  background: #d32f2f;
+}
+
+.method-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.method-list p {
+  color: #888;
+  margin-bottom: 8px;
+}
+
+.method-btn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+}
+
+.method-btn:hover {
+  background: rgba(233, 69, 96, 0.2);
+  border-color: rgba(233, 69, 96, 0.5);
+}
+
+.method-name {
+  font-weight: bold;
+}
+
+.method-rate {
+  color: #4caf50;
+  font-size: 12px;
+}
+
+/* ========================================
+   消息区域
+   ======================================== */
+.messages-section {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid rgba(233, 69, 96, 0.2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.messages-section h2 {
+  color: #e94560;
+  margin-bottom: 16px;
+  font-size: 18px;
+  border-bottom: 1px solid rgba(233, 69, 96, 0.3);
+  padding-bottom: 8px;
+  flex-shrink: 0;
+}
+
+.messages-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.messages-list .empty {
+  text-align: center;
+  color: #888;
+  padding: 40px;
+}
+
+.message {
+  display: flex;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  background: rgba(255, 255, 255, 0.05);
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.message .time {
+  color: #888;
+  min-width: 70px;
+  font-size: 11px;
+}
+
+.message .content {
+  flex: 1;
+  word-break: break-word;
+}
+
+.message.info {
+  border-left: 3px solid #2196f3;
+}
+
+.message.success {
+  border-left: 3px solid #4caf50;
+}
+
+.message.warning {
+  border-left: 3px solid #ff9800;
+}
+
+.message.error {
+  border-left: 3px solid #f44336;
+}
+
+.message.combat {
+  border-left: 3px solid #9c27b0;
+}
+
+/* ========================================
+   玩家列表区域
+   ======================================== */
+.players-section {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid rgba(233, 69, 96, 0.2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.players-section h2 {
+  color: #e94560;
+  margin-bottom: 16px;
+  font-size: 18px;
+  border-bottom: 1px solid rgba(233, 69, 96, 0.3);
+  padding-bottom: 8px;
+  flex-shrink: 0;
+}
+
+.players-section .empty {
+  text-align: center;
+  color: #888;
+  padding: 40px;
+}
+
+.player-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.player-item {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.2s;
+}
+
+.player-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(233, 69, 96, 0.3);
+}
+
+.player-info-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.player-info-row .name {
+  font-weight: bold;
+}
+
+.player-info-row .realm {
+  color: #ffd700;
+  font-size: 12px;
+}
+
+/* 同步状态样式 */
+.player-info-row .realm.status-synced {
+  color: #4caf50;
+  font-weight: bold;
+}
+
+.player-info-row .realm.status-syncing {
+  color: #ff9800;
+  animation: pulse 1s infinite;
+}
+
+.player-info-row .realm.status-unsynced {
+  color: #888;
+  font-style: italic;
+}
+
+.player-info-row .realm.status-no-dht {
+  color: #666;
+  font-style: italic;
+  text-decoration: line-through;
+}
+
+.player-actions-row {
+  display: flex;
+  gap: 8px;
+}
+
+.player-actions-row button {
+  flex: 1;
+  padding: 6px;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.player-actions-row button:first-child {
+  background: #f44336;
+  color: white;
+}
+
+.player-actions-row button:last-child {
+  background: #4caf50;
+  color: white;
+}
+
+.player-actions-row button:hover {
+  opacity: 0.8;
+  transform: translateY(-1px);
+}
+
+.player-actions-row button.query-level-btn {
+  flex: 0 0 auto;
+  background: #2196f3;
+  color: white;
+  padding: 6px 8px;
+  font-size: 11px;
+}
+
+.player-actions-row button.query-level-btn:disabled {
+  background: #666;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* ========================================
+   弹窗遮罩
+   ======================================== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+/* ========================================
+   角色面板
+   ======================================== */
+.player-panel-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+.player-panel {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border: 2px solid #e94560;
+  border-radius: 12px;
+  width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+  color: white;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(233, 69, 96, 0.3);
+}
+
+.panel-header h2 {
+  margin: 0;
+  color: #e94560;
+  font-size: 24px;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 28px;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.close-btn:hover {
+  background: rgba(233, 69, 96, 0.3);
+}
+
+/* 角色面板操作按钮 */
+.panel-actions {
+  padding: 0 20px 12px;
+  border-bottom: 1px solid rgba(233, 69, 96, 0.3);
+}
+
+.backup-btn {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid rgba(233, 69, 96, 0.5);
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(233, 69, 96, 0.3), rgba(255, 107, 107, 0.3));
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+
+.backup-btn:hover {
+  background: linear-gradient(135deg, rgba(233, 69, 96, 0.5), rgba(255, 107, 107, 0.5));
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(233, 69, 96, 0.3);
+}
+
+.panel-content {
+  padding: 20px;
+}
+
+.basic-info {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.realm-badge {
+  background: linear-gradient(135deg, #e94560, #ff6b6b);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.level-info {
+  font-size: 18px;
+  color: #ffd700;
+}
+
+.exp-bar-container {
+  margin-bottom: 20px;
+}
+
+.exp-label {
+  font-size: 12px;
+  color: #aaa;
+  margin-bottom: 4px;
+}
+
+.exp-text {
+  text-align: right;
+  font-size: 12px;
+  color: #aaa;
+  margin-top: 4px;
+}
+
+.health-mana {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.resource-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.resource-label {
+  width: 40px;
+  font-size: 12px;
+  color: #aaa;
+}
+
+.attribute-bar {
+  flex: 1;
+  height: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.attribute-fill {
+  height: 100%;
+  border-radius: 8px;
+  transition: width 0.3s ease;
+}
+
+.resource-value {
+  width: 80px;
+  text-align: right;
+  font-size: 12px;
+}
+
+.attributes-section,
+.equipment-section,
+.cultivation-section-panel {
+  margin-bottom: 24px;
+}
+
+.attributes-section h3,
+.equipment-section h3,
+.cultivation-section-panel h3 {
+  margin: 0 0 12px 0;
+  color: #e94560;
+  font-size: 16px;
+  border-bottom: 1px solid rgba(233, 69, 96, 0.3);
+  padding-bottom: 8px;
+}
+
+.attributes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.attribute-item {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 12px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.attr-name {
+  display: block;
+  font-size: 12px;
+  color: #aaa;
+  margin-bottom: 4px;
+}
+
+.attr-value {
+  display: block;
+  font-size: 20px;
+  font-weight: bold;
+  color: #fff;
+}
+
+.equipment-slots {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.equipment-slot {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.equipment-slot.empty {
+  opacity: 0.5;
+}
+
+.equipment-slot.filled {
+  border-color: rgba(233, 69, 96, 0.3);
+  background: rgba(233, 69, 96, 0.1);
+}
+
+.slot-name {
+  font-size: 11px;
+  color: #888;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.equip-name {
+  font-weight: bold;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.equip-bonus {
+  font-size: 11px;
+  color: #4caf50;
+}
+
+.empty-text {
+  color: #666;
+  font-style: italic;
+}
+
+.method-card {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 16px;
+  border-radius: 8px;
+  border-left: 4px solid #e94560;
+}
+
+.method-name {
+  font-weight: bold;
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+.method-quality {
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.method-desc {
+  font-size: 13px;
+  color: #aaa;
+  line-height: 1.5;
+}
+
+/* ========================================
+   战斗面板
+   ======================================== */
+.combat-panel {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border: 2px solid #e94560;
+  border-radius: 12px;
+  padding: 16px;
+  color: white;
+  min-width: 400px;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.combat-panel.empty {
+  text-align: center;
+  padding: 40px;
+}
+
+.combat-message {
+  font-size: 18px;
+  color: #888;
+}
+
+.combat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(233, 69, 96, 0.3);
+}
+
+.round-info {
+  font-size: 16px;
+  font-weight: bold;
+  color: #ffd700;
+}
+
+.combat-status {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.combat-status.active {
+  background: #4caf50;
+}
+
+.combat-status.ended {
+  background: #f44336;
+}
+
+.combat-arena {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.combatant {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.combatant-name {
+  font-weight: bold;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.combatant.enemy .combatant-name {
+  color: #f44336;
+}
+
+.combatant.self .combatant-name {
+  color: #4caf50;
+}
+
+.hp-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hp-bar {
+  flex: 1;
+  height: 20px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.hp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #f44336, #ff6b6b);
+  transition: width 0.3s ease;
+}
+
+.hp-fill.self {
+  background: linear-gradient(90deg, #4caf50, #8bc34a);
+}
+
+.hp-text {
+  font-size: 12px;
+  min-width: 80px;
+  text-align: right;
+}
+
+.vs-divider {
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+  color: #e94560;
+  margin: 8px 0;
+}
+
+.combat-logs {
+  margin-bottom: 16px;
+}
+
+.combat-logs h4 {
+  margin: 0 0 8px 0;
+  color: #e94560;
+  font-size: 14px;
+}
+
+.logs-container {
+  max-height: 150px;
+  overflow-y: auto;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.log-entry {
+  display: flex;
+  gap: 8px;
+  padding: 4px 0;
+  font-size: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.log-entry:last-child {
+  border-bottom: none;
+}
+
+.log-time {
+  color: #888;
+  min-width: 70px;
+}
+
+.log-message {
+  flex: 1;
+}
+
+.log-damage {
+  color: #f44336;
+  font-weight: bold;
+}
+
+.crit-tag {
+  color: #ffd700;
+  font-weight: bold;
+}
+
+.combat-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.skill-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 12px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.skill-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.skill-btn.selected {
+  border-color: #e94560;
+  background: rgba(233, 69, 96, 0.2);
+}
+
+.skill-btn.physical {
+  border-left: 3px solid #f44336;
+}
+
+.skill-btn.magical {
+  border-left: 3px solid #2196f3;
+}
+
+.skill-btn.true {
+  border-left: 3px solid #ffd700;
+}
+
+.skill-name {
+  font-weight: bold;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.skill-info {
+  display: flex;
+  gap: 8px;
+  font-size: 11px;
+  color: #aaa;
+}
+
+.damage {
+  color: #f44336;
+}
+
+.mana-cost {
+  color: #2196f3;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.escape-btn,
+.surrender-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+
+.escape-btn {
+  background: #ff9800;
+  color: white;
+}
+
+.escape-btn:hover {
+  background: #f57c00;
+}
+
+.surrender-btn {
+  background: #9e9e9e;
+  color: white;
+}
+
+.surrender-btn:hover {
+  background: #757575;
+}
+
+.combat-result {
+  text-align: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+}
+
+.result-text {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.result-text.win {
+  color: #4caf50;
+}
+
+.result-text.lose {
+  color: #f44336;
+}
+
+.result-text.draw {
+  color: #ff9800;
+}
+
+/* ========================================
+   交易面板
+   ======================================== */
+.trade-panel {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border: 2px solid #e94560;
+  border-radius: 12px;
+  padding: 24px;
+  min-width: 300px;
+  color: white;
+}
+
+.trade-panel h3 {
+  color: #e94560;
+  margin-bottom: 16px;
+}
+
+.trade-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.trade-actions button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+
+.trade-actions button:first-child {
+  background: #9e9e9e;
+  color: white;
+}
+
+.trade-actions button:first-child:hover {
+  background: #757575;
+}
+
+.trade-actions button:last-child {
+  background: #4caf50;
+  color: white;
+}
+
+.trade-actions button:last-child:hover {
+  background: #388e3c;
+}
+
+/* ========================================
+   CID弹窗
+   ======================================== */
+.cid-panel {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border: 2px solid #e94560;
+  border-radius: 12px;
+  padding: 0;
+  min-width: 400px;
+  max-width: 90%;
+  color: white;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.cid-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(233, 69, 96, 0.3);
+}
+
+.cid-header h3 {
+  margin: 0;
+  color: #e94560;
+  font-size: 20px;
+}
+
+.cid-content {
+  padding: 24px 20px;
+}
+
+.cid-message {
+  text-align: center;
+  color: #4caf50;
+  font-size: 16px;
+  margin-bottom: 20px;
+  padding: 12px;
+  background: rgba(76, 175, 80, 0.1);
+  border-radius: 8px;
+  border-left: 4px solid #4caf50;
+}
+
+.cid-display {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.cid-display input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid rgba(233, 69, 96, 0.3);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  color: #ffd700;
+  font-family: monospace;
+  font-size: 14px;
+  word-break: break-all;
+}
+
+.cid-display input:focus {
+  outline: none;
+  border-color: #e94560;
+}
+
+.copy-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #e94560, #ff6b6b);
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.copy-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(233, 69, 96, 0.4);
+}
+
+.cid-hint {
+  text-align: center;
+  color: #888;
+  font-size: 12px;
+  margin-top: 12px;
+}
+
+/* ========================================
+   加载遮罩
+   ======================================== */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  animation: fadeIn 0.2s ease;
+}
+
+.loading-content {
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 60px;
+  height: 60px;
+  border: 4px solid rgba(233, 69, 96, 0.3);
+  border-top-color: #e94560;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-content p {
+  color: #e94560;
+  font-size: 16px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* ========================================
+   滚动条样式
+   ======================================== */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(233, 69, 96, 0.5);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(233, 69, 96, 0.7);
+}
+
+/* ========================================
+   响应式设计
+   ======================================== */
+@media (max-width: 1024px) {
+  .game-main {
+    grid-template-columns: 250px 1fr 250px;
+  }
+}
+
+@media (max-width: 768px) {
+  .game-main {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr auto;
+    overflow-y: auto;
+  }
+
+  .cultivation-section,
+  .players-section {
+    max-height: 200px;
+  }
+
+  .messages-section {
+    min-height: 300px;
+  }
+
+  .player-panel {
+    width: 90%;
+    max-width: 400px;
+  }
+
+  .attributes-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .equipment-slots {
+    grid-template-columns: 1fr;
+  }
+
+  .combat-panel {
+    min-width: auto;
+    width: 90%;
+    max-width: 400px;
+  }
+
+  .skills-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .game-header {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .player-info {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .player-name {
+    font-size: 14px;
+  }
+
+  .realm {
+    font-size: 10px;
+    padding: 2px 8px;
+  }
+
+  .header-actions button {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .login-panel {
+    padding: 24px;
+    min-width: auto;
+    width: 90%;
+  }
+
+  .login-panel h1 {
+    font-size: 22px;
+  }
+}
