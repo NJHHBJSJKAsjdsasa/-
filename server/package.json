@@ -1,0 +1,47 @@
+{
+  "name": "xiuxian-game-server",
+  "version": "1.0.0",
+  "description": "P2P修仙游戏信令服务器",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "lint": "eslint . --ext .ts",
+    "dht": "node dht-bootstrap.js",
+    "dht:bootstrap": "set DHT_BOOTSTRAP=true&& node dht-bootstrap.js",
+    "dht:debug": "set DHT_LOG_LEVEL=debug&& node dht-bootstrap.js",
+    "dht:ws": "node dht-websocket-bridge.js",
+    "dht:ws:bootstrap": "set DHT_BOOTSTRAP=true&& node dht-websocket-bridge.js",
+    "dht:ws:debug": "set DHT_LOG_LEVEL=debug&& node dht-websocket-bridge.js"
+  },
+  "keywords": [
+    "p2p",
+    "game",
+    "signaling",
+    "webrtc"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bittorrent-dht": "^11.0.11",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "socket.io": "^4.7.4",
+    "uuid": "^9.0.1",
+    "winston": "^3.19.0",
+    "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.10.6",
+    "@types/uuid": "^9.0.7",
+    "@typescript-eslint/eslint-plugin": "^6.16.0",
+    "@typescript-eslint/parser": "^6.16.0",
+    "eslint": "^8.56.0",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.3.3"
+  }
+}
