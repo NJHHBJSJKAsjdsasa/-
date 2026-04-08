@@ -838,13 +838,18 @@ function stopCultivation() {
 function initNetwork() {
   if (networkManager) return;
 
-  // 配置多个信令节点地址
+  // 配置全球信令节点地址
   networkManager = new NetworkManager({
     signalingUrl: 'ws://49.232.170.26:5050',
     signalNodes: [
-      'ws://49.232.170.26:5050',
-      'ws://49.232.170.26:5051',
-      'ws://49.232.170.26:5052'
+      // 北美节点
+      'ws://us-bootstrap.p2p修仙游戏.com:5050',
+      // 欧洲节点
+      'ws://eu-bootstrap.p2p修仙游戏.com:5050',
+      // 亚洲节点
+      'ws://asia-bootstrap.p2p修仙游戏.com:5050',
+      // 备用节点
+      'ws://49.232.170.26:5050'
     ],
     reconnectInterval: 3000,
     maxReconnectAttempts: 5,

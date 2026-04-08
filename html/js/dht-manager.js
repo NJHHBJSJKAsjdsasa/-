@@ -383,6 +383,13 @@ class DHTManager extends EventTarget {
     this.config = {
       // Bootstrap节点配置
       bootstrapNodes: config.bootstrapNodes || [
+        // 北美节点
+        { url: 'ws://us-bootstrap.p2p修仙游戏.com:5050/dht', nodeId: null },
+        // 欧洲节点
+        { url: 'ws://eu-bootstrap.p2p修仙游戏.com:5050/dht', nodeId: null },
+        // 亚洲节点
+        { url: 'ws://asia-bootstrap.p2p修仙游戏.com:5050/dht', nodeId: null },
+        // 备用节点
         { url: 'ws://49.232.170.26:5050/dht', nodeId: null }
       ],
       
@@ -576,22 +583,25 @@ class DHTManager extends EventTarget {
   async connectToBootstrapNodes() {
     console.log('[DHTManager] Connecting to bootstrap nodes...');
     
+    // 并行连接所有引导节点
     const connectPromises = this.config.bootstrapNodes.map(async (bootstrap) => {
       try {
         await this.connectToBootstrap(bootstrap);
-        return true;
+        return { url: bootstrap.url, success: true };
       } catch (error) {
         console.warn('[DHTManager] Failed to connect to bootstrap:', bootstrap.url, error.message);
-        return false;
+        return { url: bootstrap.url, success: false };
       }
     });
     
-    const results = await Promise.allSettled(connectPromises);
-    const connected = results.some(r => r.status === 'fulfilled' && r.value);
+    const results = await Promise.all(connectPromises);
+    const connected = results.some(r => r.success);
     
     if (!connected) {
       throw new Error('Failed to connect to any bootstrap node');
     }
+    
+    console.log('[DHTManager] Connected to', results.filter(r => r.success).length, 'bootstrap nodes');
     
     // 执行初始的find_node查询来填充路由表
     await this.refreshRoutingTable();
@@ -1073,6 +1083,15 @@ class DHTManager extends EventTarget {
     return `${this.nodeId.toHex().substring(0, 8)}-${++this.requestCounter}-${Date.now()}`;
   }
   
+  /**
+   * 生成随机ID
+   */
+  generateRandomId() {
+    const bytes = new Uint8Array(20);
+    crypto.getRandomValues(bytes);
+    return new NodeID(bytes);
+  }
+  
   // ========================================
   // 玩家信息同步 (游戏扩展)
   // ========================================
@@ -1445,13 +1464,45 @@ class DHTManager extends EventTarget {
     // 对自己执行find_node来发现更多节点
     const closest = this.routingTable.findClosest(this.nodeId, this.config.alpha);
     
-    for (const node of closest) {
+    if (closest.length === 0) {
+      console.log('[DHTManager] No nodes in routing table, using bootstrap nodes');
+      // 如果路由表为空，使用引导节点
+      for (const bootstrap of this.config.bootstrapNodes) {
+        try {
+          const node = {
+            id: new NodeID(bootstrap.nodeId || this.generateRandomId()),
+            address: { type: 'bootstrap', url: bootstrap.url },
+            lastSeen: Date.now()
+          };
+          this.routingTable.addNode(node);
+        } catch (error) {
+          console.warn('[DHTManager] Failed to add bootstrap node:', error.message);
+        }
+      }
+      return;
+    }
+    
+    // 并行查询所有最近的节点
+    const queryPromises = closest.map(async (node) => {
       try {
         await this.findNode(this.nodeId, node);
+        return { node: node.id.toHex(), success: true };
       } catch (error) {
-        console.warn('[DHTManager] Find node failed:', error.message);
+        console.warn('[DHTManager] Find node failed for', node.id.toHex().substring(0, 16), ':', error.message);
+        // 移除失败的节点
+        this.routingTable.removeNode(node.id);
+        return { node: node.id.toHex(), success: false };
       }
-    }
+    });
+    
+    const results = await Promise.all(queryPromises);
+    const successCount = results.filter(r => r.success).length;
+    
+    console.log('[DHTManager] Routing table refresh completed:', successCount, 'successful queries');
+    
+    // 显示路由表统计
+    const stats = this.routingTable.getStats();
+    console.log('[DHTManager] Routing table stats:', stats);
   }
   
   /**
@@ -1460,14 +1511,28 @@ class DHTManager extends EventTarget {
   async pingAllNodes() {
     const allNodes = this.routingTable.getAllNodes();
     
-    for (const node of allNodes) {
+    if (allNodes.length === 0) {
+      return;
+    }
+    
+    // 并行ping所有节点，提高性能
+    const pingPromises = allNodes.map(async (node) => {
       try {
         await this.ping(node);
+        return { node, success: true };
       } catch (error) {
         // 标记节点为失效
         console.warn('[DHTManager] Node ping failed, removing:', node.id.toHex().substring(0, 16));
         this.routingTable.removeNode(node.id);
+        return { node, success: false };
       }
+    });
+    
+    const results = await Promise.all(pingPromises);
+    const successCount = results.filter(r => r.success).length;
+    
+    if (allNodes.length > 0) {
+      console.log(`[DHTManager] Pinged ${allNodes.length} nodes, ${successCount} successful`);
     }
   }
   

@@ -12,9 +12,26 @@ class P2PConnection extends EventTarget {
       targetPeerId: config.targetPeerId || null,
       isInitiator: config.isInitiator || false,
       iceServers: config.iceServers || [
+        // Google STUN servers
         { urls: 'stun:stun.l.google.com:19302' },
         { urls: 'stun:stun1.l.google.com:19302' },
-        { urls: 'stun:stun2.l.google.com:19302' }
+        { urls: 'stun:stun2.l.google.com:19302' },
+        { urls: 'stun:stun3.l.google.com:19302' },
+        { urls: 'stun:stun4.l.google.com:19302' },
+        // 备用STUN服务器
+        { urls: 'stun:stun.cloudflare.com:3478' },
+        { urls: 'stun:stun.ekiga.net:3478' },
+        // TURN服务器（需要根据实际情况配置）
+        // {
+        //   urls: 'turn:turn.p2p修仙游戏.com:443',
+        //   username: 'p2p修仙游戏',
+        //   credential: 'secure-password'
+        // },
+        // {
+        //   urls: 'turn:turn-backup.p2p修仙游戏.com:443',
+        //   username: 'p2p修仙游戏',
+        //   credential: 'secure-password'
+        // }
       ],
       ...config
     };
@@ -336,9 +353,14 @@ class P2PConnection extends EventTarget {
       
       // 处理心跳消息
       if (message.type === 'heartbeat') {
-        this.sendMessage('heartbeat-response', { 
-          timestamp: message.data.timestamp,
-          receivedAt: Date.now()
+        this.sendRawMessage({
+          type: 'heartbeat-response',
+          data: {
+            timestamp: message.data.timestamp,
+            receivedAt: Date.now()
+          },
+          from: this.config.peerId,
+          timestamp: Date.now()
         });
         return;
       }
@@ -673,7 +695,16 @@ class P2PConnectionManager extends EventTarget {
     this.setupConnectionHandlers(connection, targetPeerId);
     this.connections.set(targetPeerId, connection);
     
-    connection.createPeerConnection();
+    // 异步创建连接，不阻塞调用
+    setTimeout(() => {
+      try {
+        connection.createPeerConnection();
+      } catch (error) {
+        console.error('[P2PManager] Failed to create peer connection:', error);
+        this.connections.delete(targetPeerId);
+        this.emit('connectionError', { peerId: targetPeerId, error });
+      }
+    }, 0);
     
     return connection;
   }

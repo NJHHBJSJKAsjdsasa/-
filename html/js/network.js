@@ -10,7 +10,16 @@ class NetworkManager extends EventTarget {
     
     this.config = {
       signalingUrl: config.signalingUrl || 'ws://49.232.170.26:5050',
-      signalNodes: config.signalNodes || [],
+      signalNodes: config.signalNodes || [
+        // 北美节点
+        'ws://us-bootstrap.p2p修仙游戏.com:5050',
+        // 欧洲节点
+        'ws://eu-bootstrap.p2p修仙游戏.com:5050',
+        // 亚洲节点
+        'ws://asia-bootstrap.p2p修仙游戏.com:5050',
+        // 备用节点
+        'ws://49.232.170.26:5050'
+      ],
       reconnectInterval: config.reconnectInterval || 3000,
       maxReconnectAttempts: config.maxReconnectAttempts || 5,
       heartbeatInterval: config.heartbeatInterval || 30000,
@@ -30,6 +39,7 @@ class NetworkManager extends EventTarget {
     this.reconnectTimer = null;
     this.heartbeatTimer = null;
     this.nodeRefreshTimer = null;
+    this.nodeUpdateTimer = null;
     
     this.player = null;
     this.currentRoom = null;
@@ -192,29 +202,38 @@ class NetworkManager extends EventTarget {
    * @returns {Promise<number>} 延迟(ms)
    */
   async testNodeLatency(nodeUrl) {
+    // 检查缓存的延迟值（5分钟内有效）
+    const cached = this.nodeLatencies.get(nodeUrl);
+    if (cached && (Date.now() - cached.timestamp) < 5 * 60 * 1000) {
+      return cached.latency;
+    }
+    
     return new Promise((resolve) => {
       const startTime = Date.now();
       const testSocket = io(nodeUrl, {
         transports: ['websocket'],
         reconnection: false,
-        timeout: 5000
+        timeout: 3000 // 减少超时时间，提高测试速度
       });
       
       const timeout = setTimeout(() => {
         testSocket.close();
+        this.nodeLatencies.set(nodeUrl, { latency: -1, timestamp: Date.now() });
         resolve(-1);
-      }, 5000);
+      }, 3000);
       
       testSocket.on('connect', () => {
         clearTimeout(timeout);
         const latency = Date.now() - startTime;
         testSocket.close();
+        this.nodeLatencies.set(nodeUrl, { latency, timestamp: Date.now() });
         resolve(latency);
       });
       
       testSocket.on('connect_error', () => {
         clearTimeout(timeout);
         testSocket.close();
+        this.nodeLatencies.set(nodeUrl, { latency: -1, timestamp: Date.now() });
         resolve(-1);
       });
     });
@@ -239,13 +258,23 @@ class NetworkManager extends EventTarget {
     
     const latencyResults = [];
     
-    for (const node of nodesToTest) {
-      const latency = await this.testNodeLatency(node.url);
-      if (latency > 0) {
-        latencyResults.push({ url: node.url, latency, isDefault: node.isDefault });
-        this.nodeLatencies.set(node.url, latency);
+    // 并行测试所有节点的延迟
+    const testPromises = nodesToTest.map(async (node) => {
+      try {
+        const latency = await this.testNodeLatency(node.url);
+        if (latency > 0) {
+          const result = { url: node.url, latency, isDefault: node.isDefault };
+          latencyResults.push(result);
+          this.nodeLatencies.set(node.url, latency);
+          return result;
+        }
+      } catch (error) {
+        console.warn(`[Network] Failed to test node ${node.url}:`, error);
       }
-    }
+      return null;
+    });
+    
+    await Promise.all(testPromises);
     
     if (latencyResults.length === 0) {
       return this.config.signalingUrl;
@@ -323,8 +352,30 @@ class NetworkManager extends EventTarget {
       return;
     }
     
+    // 测试所有可用节点的延迟，选择最佳节点
+    const nodeLatencies = [];
+    const testPromises = availableNodes.map(async (nodeUrl) => {
+      try {
+        const latency = await this.testNodeLatency(nodeUrl);
+        if (latency > 0) {
+          nodeLatencies.push({ url: nodeUrl, latency });
+        }
+      } catch (error) {
+        console.warn(`[Network] Failed to test node ${nodeUrl}:`, error);
+      }
+    });
+    
+    await Promise.all(testPromises);
+    
+    // 按延迟排序，优先尝试延迟低的节点
+    nodeLatencies.sort((a, b) => a.latency - b.latency);
+    
+    const nodesToTry = nodeLatencies.length > 0 
+      ? nodeLatencies.map(n => n.url) 
+      : availableNodes;
+    
     // 尝试连接其他节点
-    for (const nodeUrl of availableNodes) {
+    for (const nodeUrl of nodesToTry) {
       try {
         this.config.signalingUrl = nodeUrl;
         this.emit('failoverAttempt', { nodeUrl });
@@ -409,12 +460,13 @@ class NetworkManager extends EventTarget {
         
         this.socket.on('connect', async () => {
           this.isConnected = true;
-          this.isConnecting = false;
-          this.reconnectAttempts = 0;
-          this.currentNode = this.config.signalingUrl;
-          this.startHeartbeat();
-          this.startNodeRefresh();
-          this.emit('connected', { socketId: this.socket.id, nodeUrl: this.currentNode });
+        this.isConnecting = false;
+        this.reconnectAttempts = 0;
+        this.currentNode = this.config.signalingUrl;
+        this.startHeartbeat();
+        this.startNodeRefresh();
+        this.startNodeUpdate();
+        this.emit('connected', { socketId: this.socket.id, nodeUrl: this.currentNode });
           
           // 连接成功后获取信令节点列表
           try {
@@ -822,6 +874,7 @@ class NetworkManager extends EventTarget {
   disconnect(clearNodes = true) {
     this.stopHeartbeat();
     this.stopNodeRefresh();
+    this.stopNodeUpdate();
     
     if (this.reconnectTimer) {
       clearTimeout(this.reconnectTimer);
@@ -881,6 +934,79 @@ class NetworkManager extends EventTarget {
    */
   getCurrentNode() {
     return this.currentNode;
+  }
+
+  /**
+   * 添加信令节点
+   */
+  addSignalNodes(nodes) {
+    if (Array.isArray(nodes)) {
+      nodes.forEach(node => {
+        const nodeUrl = node.url || node;
+        if (!this.signalNodes.some(n => (n.url || n) === nodeUrl)) {
+          this.signalNodes.push(node);
+        }
+      });
+    }
+  }
+
+  /**
+   * 移除信令节点
+   */
+  removeSignalNode(nodeUrl) {
+    this.signalNodes = this.signalNodes.filter(node => (node.url || node) !== nodeUrl);
+  }
+
+  /**
+   * 清理无效节点
+   */
+  async cleanInvalidNodes() {
+    const validNodes = [];
+    
+    for (const node of this.signalNodes) {
+      const nodeUrl = node.url || node;
+      try {
+        const latency = await this.testNodeLatency(nodeUrl);
+        if (latency > 0) {
+          validNodes.push(node);
+        } else {
+          console.warn(`[Network] Removing invalid node: ${nodeUrl}`);
+        }
+      } catch (error) {
+        console.warn(`[Network] Removing invalid node: ${nodeUrl}`, error);
+      }
+    }
+    
+    this.signalNodes = validNodes;
+    console.log(`[Network] Cleaned invalid nodes, remaining: ${validNodes.length}`);
+  }
+
+  /**
+   * 定期更新节点列表
+   */
+  startNodeUpdate() {
+    this.stopNodeUpdate();
+    
+    this.nodeUpdateTimer = setInterval(async () => {
+      try {
+        await this.cleanInvalidNodes();
+        if (this.isConnected) {
+          await this.fetchSignalNodes();
+        }
+      } catch (error) {
+        console.warn('[Network] Node update failed:', error);
+      }
+    }, this.config.nodeRefreshInterval * 2);
+  }
+
+  /**
+   * 停止定期更新节点列表
+   */
+  stopNodeUpdate() {
+    if (this.nodeUpdateTimer) {
+      clearInterval(this.nodeUpdateTimer);
+      this.nodeUpdateTimer = null;
+    }
   }
 
   /**
